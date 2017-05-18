@@ -1,26 +1,26 @@
 var R = require('ramda');
-var request = require('request');
-var cheerio = require('cheerio');
+var argv = require('minimist')(process.argv.slice(2));
+var Sites = require('./sites');
 
-var cardNames = []
+var cards = {};
 
-const handleRes = (err, res, body) => {
-  var phtml = JSON.parse(body)
-  const $ = cheerio.load(phtml.phtml)
-  var productLinkSpanBolds = $('.productSetDisplay .productLinkSpan > b').each((i, elem) => {
-    cardNames[i] = $(elem).text();
-  })
+const main = () => {
+  console.log(argv);
+  card_name = argv.name;
 
-  console.log(cardNames)
+  Sites.CSI.search(card_name, card_add_callback('csi'));
+  // @TODO : Add scrapers for other sites.
+  //Sites.CF.search(card_name, card_add_callback('cf'));
+  //Sites.MM.search(card_name, card_add_callback('mm'));
+  //Sites.CK.search(card_name, card_add_callback('ck'));
 }
 
-request({
-  url: "http://www.coolstuffinc.com/ajax_buylist.php",
-  qs: {
-    ajaxdata: "Amonkhet",
-    ajaxtype: "selectProductSetName",
-    ajaxgame: "mtg"
-  }
-}, handleRes)
+const card_add_callback = R.curry((key, new_cards) => {
+  console.log("WE HIT THIS.");
+  cards[key] = new_cards;
+  console.log(cards);
+})
 
-
+if (require.main === module) {
+  main();
+}
